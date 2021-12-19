@@ -1,0 +1,25 @@
+<!--
+  -  VM-POP3 - Virtual Mail Pop3 decoders
+  -  Author: Daniel Cid.
+  -  Updated by Wazuh, Inc.
+  -  Copyright (C) 2015-2021, Wazuh Inc.
+  -  Copyright (C) 2009 Trend Micro Inc.
+  -  This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2.
+-->
+
+<decoder name="vm-pop3d">
+  <program_name>^vm-pop3d</program_name>
+</decoder>
+
+<decoder name="vm-pop3d-fail">
+  <parent>vm-pop3d[\s\S]*?vm-pop3d</parent>
+  <prematch>vm-pop3d[\s\S]*?User '</prematch>
+  <regex offset="after_prematch">vm-pop3d[\s\S]*?User '(\S+)' - \w+ auth, </regex>
+  <order>user, srcip</order>
+</decoder>
+<decoder name="vm-pop3d-fail">
+  <parent>vm-pop3d[\s\S]*?vm-pop3d</parent>
+  <prematch>vm-pop3d[\s\S]*?User '</prematch>
+  <regex offset="after_prematch">vm-pop3d[\s\S]*?from=(\S+)$</regex>
+  <order>user, srcip</order>
+</decoder>

@@ -1,0 +1,143 @@
+
+<!--
+  -  SQL Server decoders
+  -  Created by Wazuh, Inc.
+  -  Copyright (C) 2015-2021, Wazuh Inc.
+  -  This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2.
+-->
+
+
+<decoder name="sqlserver">
+    <prematch>^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d \S+  </prematch>
+</decoder>
+
+<!--
+2017-04-03 15:53:08.63 user     Starting up database 'mustest'.
+-->
+
+<decoder name="sqlserver-startdb">
+    <parent>sqlserver</parent>
+    <prematch offset="after_parent">^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d[\s\S]*?Starting up database </prematch>
+    <regex offset="after_prematch">'(\S*)'</regex>
+    <order>sqlserver.dbname</order>
+</decoder>
+
+<!--
+2017-04-03 15:53:26.47 user      Attempting to load library 'xplog70.dll' into memory. This is an informational message only. No user action is required.
+-->
+
+<decoder name="sqlserver-loadlibrary">
+    <parent>sqlserver</parent>
+    <prematch offset="after_parent">^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d[\s\S]*?Attempting to load library </prematch>
+    <regex offset="after_prematch">'(\S*)'</regex>
+    <order>sqlserver.library</order>
+</decoder>
+
+<!--
+2017-04-03 15:53:00.66 Server      Server process ID is 3333.
+-->
+
+<decoder name="sqlserver-serverprocessid">
+    <parent>sqlserver</parent>
+    <prematch offset="after_parent">^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d[\s\S]*?Server process ID is </prematch>
+    <regex offset="after_prematch">^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d[\s\S]*?Server process ID is (\d+)</regex>
+    <order>sqlserver.processid</order>
+</decoder>
+
+<!--
+2017-04-03 15:55:24.37 Logon       Login succeeded for user 'DOMAIN\user'. Connection made using Windows authentication. [CLIENT: 10.10.10.10]
+-->
+
+<decoder name="sqlserver-loginsuccess">
+    <parent>sqlserver</parent>
+    <prematch offset="after_parent">^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d[\s\S]*?(Login succeeded for user|Login failed for user)</prematch>
+    <regex offset="after_prematch">'(\S*)'\.+[CLIENT: (\d+.\d+.\d+.\d+)]|'(\S*)'.+[CLIENT: (\S+)]</regex>
+    <order>srcuser</order>
+</decoder>
+<decoder name="sqlserver-loginsuccess">
+    <parent>sqlserver</parent>
+    <prematch offset="after_parent">^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d[\s\S]*?(Login succeeded for user|Login failed for user)</prematch>
+    <regex offset="after_prematch">'\S*'.+\[CLIENT: (\d+.\d+.\d+.\d+)\]|'(\.*)'.+[CLIENT: (\S+)]</regex>
+    <order>srcip</order>
+</decoder>
+
+<!--
+2017-04-03 15:53:08.22 Logon       Login failed for user 'DOMAIN\usersql'. Reason: Failed to open the explicitly specified database. [CLIENT: ffff::5555:4444:bbbb:3344%55]
+-->
+<!--
+2017-04-03 15:53:26.11 user      Using 'xpstar.dll' version '2007.100.6000' to execute extended stored procedure 'xp_instance_regread'. This is an informational message only; no user action is required.
+-->
+
+<decoder name="sqlserver-usinglibrary">
+    <parent>sqlserver</parent>
+    <prematch offset="after_parent">^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d[\s\S]*?Using </prematch>
+    <regex offset="after_prematch">'(\S*)'.+to execute extended stored procedure '(\S*)'</regex>
+    <order>sqlserver.library</order>
+</decoder>
+<decoder name="sqlserver-usinglibrary">
+    <parent>sqlserver</parent>
+    <prematch offset="after_parent">^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d[\s\S]*?Using </prematch>
+    <regex offset="after_prematch">to execute extended stored procedure '(\S*)'</regex>
+    <order>sqlserver.procedure</order>
+</decoder>
+
+<!--
+2017-04-03 15:53:07.73 Server      The SQL Server Network Interface library could not register the Service Principal Name (SPN) for the SQL Server service. Error: 0x2098, state: 15. Failure to register an SPN may cause integrated authentication to fall back to NTLM instead of Kerberos. This is an informational message. Further action is only required if Kerberos authentication is required by authentication policies.
+ -->
+
+<decoder name="sqlserver-errorspn">
+    <parent>sqlserver</parent>
+    <prematch offset="after_parent">^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d[\s\S]*?The SQL Server Network Interface library could not register the Service Principal Name </prematch>
+    <regex offset="after_prematch"Error: (\S*), state: \d+.</regex>
+    <order>sqlserver.errorhex</order>
+</decoder>
+<decoder name="sqlserver-errorspn">
+    <parent>sqlserver</parent>
+    <prematch offset="after_parent">^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d[\s\S]*?The SQL Server Network Interface library could not register the Service Principal Name </prematch>
+    <regex offset="after_prematch">Error: \S*, state: (\d+).</regex>
+    <order> sqlserver.state</order>
+</decoder>
+<!--
+2017-04-03 15:53:12.59 Logon       Error: 18456, Severity: 14, State: 38.
+-->
+
+<decoder name="sqlserver-error">
+    <parent>sqlserver</parent>
+    <prematch offset="after_parent">^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d[\s\S]*?Error: </prematch>
+    <regex offset="after_prematch">(\d+), Severity: \d+, State: \d+</regex>
+    <order>sqlserver.error</order>
+</decoder>
+<decoder name="sqlserver-error">
+    <parent>sqlserver</parent>
+    <prematch offset="after_parent">^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d[\s\S]*?Error: </prematch>
+    <regex offset="after_prematch">\d+, Severity: (\d+), State: \d)</regex>
+    <order>sqlserver.error,sqlserver.severity,sqlserver.state</order>
+</decoder>
+<decoder name="sqlserver-error">
+    <parent>sqlserver</parent>
+    <prematch offset="after_parent">^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d[\s\S]*?Error: </prematch>
+    <regex offset="after_prematch">\d+, Severity: \d+, State: (\d+)</regex>
+    <order>sqlserver.error,sqlserver.severity,sqlserver.state</order>
+</decoder>
+<!--
+2017-04-03 15:53:03.64 user      FILESTREAM: effective level = 0, configured level = 0, file system access share name = 'MSSQLSERVER'.
+-->
+
+<decoder name="sqlserver-filestream">
+    <parent>sqlserver</parent>
+    <prematch offset="after_parent">^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d[\s\S]*?FILESTREAM: effective level = </prematch>
+    <regex offset="after_prematch">(\d+), configured level = \d+, file system access share name = '\S*'.</regex>
+    <order>sqlserver.effectivelevel,sqlserver.configuredlevel,sqlserver.fsaccesssharename</order>
+</decoder>
+<decoder name="sqlserver-filestream">
+    <parent>sqlserver</parent>
+    <prematch offset="after_parent">^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d[\s\S]*?FILESTREAM: effective level = </prematch>
+    <regex offset="after_prematch">\d+, configured level = (\d+), file system access share name = '\S*'.</regex>
+    <order>sqlserver.effectivelevel,sqlserver.configuredlevel,sqlserver.fsaccesssharename</order>
+</decoder>
+<decoder name="sqlserver-filestream">
+    <parent>sqlserver</parent>
+    <prematch offset="after_parent">^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d[\s\S]*?FILESTREAM: effective level = </prematch>
+    <regex offset="after_prematch">\d+, configured level = \d+, file system access share name = '(\S*)'.</regex>
+    <order>sqlserver.effectivelevel,sqlserver.configuredlevel,sqlserver.fsaccesssharename</order>
+</decoder>
