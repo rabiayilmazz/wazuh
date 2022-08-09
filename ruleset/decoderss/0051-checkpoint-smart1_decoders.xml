@@ -13,11 +13,6 @@
 1 2019-05-15T16:26:40Z HOSTNAME CheckPoint 19710 - [action:"Decrypt"; flags:"417028"; ifdir:"inbound"; ifname:"eth4"; logid:"0"; loguid:"{0x5cdc3dc0,0x4,0x3dff70a,0xc0000002}"; origin:"11.22.33.44"; originsicname:"CN=TR-DC-FW-INT-B-5600,O=Internet-QRO..g7hgcu"; sequencenum:"22"; time:"1557937600"; version:"5"; __policy_id_tag:"product=VPN-1 & FireWall-1[db_tag={C12F833B-77C9-3941-9B06-075E9D2A86A2};mgmt=TR-DC-VCON-2-INT;date=1557764162;policy_name=FW-INT-TR\]"; community:"safecharge.hs.triara"; dst:"11.22.33.55"; fw_subproduct:"VPN-1"; inzone:"External"; layer_name:"FW-INT-TR Security"; layer_name:"FW-INT-TR Application"; layer_uuid:"75569106-7e80-4c4e-ab23-b0848f2cb41b"; layer_uuid:"70fed639-99d5-432c-9d1e-5473a66dff08"; match_id:"127"; match_id:"33554431"; parent_rule:"0"; parent_rule:"0"; rule_action:"Accept"; rule_action:"Accept"; rule_name:"SafeCharge SEC"; rule_name:"Implicit Cleanup"; rule_uid:"7a1447ad-3f4b-4397-89d7-3adb4b5c83a5"; methods::"ESP: AES-256 + SHA256"; nat_addtnl_rulenum:"1"; nat_rulenum:"61"; outzone:"Internal"; peer_gateway:"11.22.33.77"; product:"VPN-1 & FireWall-1"; proto:"6"; s_port:"55226"; scheme::"IKE"; service:"51262"; service_id:"port_51262"; src:"11.22.33.88"; vpn_feature_name:"VPN"; xlatedport:"0"; xlatedst:"11.22.33.99"; xlatesport:"0"; xlatesrc:"0.0.0.0";
 1 2019-05-15T16:27:08Z HOSTNAME CheckPoint 19710 - [action:"Key Install"; flags:"133376"; ifdir:"inbound"; ifname:"daemon"; loguid:"{0x0,0x0,0x0,0x0}"; origin:"11.22.33.44"; originsicname:"CN=TR-DC-FW-INT-B-5600,O=Internet-QRO..g7hgcu"; sequencenum:"5"; time:"1557937628"; version:"5"; cookiei:"891f38892b0e6bd6"; cookier:"d71409f32c496d13"; dst:"11.22.33.55"; fw_subproduct:"VPN-1"; ike::"Informational Exchange Received Delete IKE-SA from Peer: 11.22.33.66; Cookies: 891f38892b0e6bd6-d71409f32c496d13 "; msgid:"a4bd6724"; peer_gateway:"11.22.33.77"; scheme::"IKE"; src:"11.22.33.99"; vpn_feature_name:"IKE"; ]
 -->
-
-<decoder name="checkpoint-smart1">
-  <prematch>^\d+ \d+-\d+-\d+T\d+:\d+:\w+ \S+ \w+ \d+ - \[</prematch>
-</decoder>  
-
 <decoder name="checkpoint-smart1-timestamp">
   <parent>checkpoint-smart1</parent>
   <prematch>^\d+ \d+-\d+-\d+T\d+:\d+:\w+ \S+ \w+ \d+ - \[</prematch>

@@ -42,11 +42,6 @@
   -->
 
 <!-- \s+\S+ \d\d:\d\d:\d\d (\w+) \d+.\d+.\d+.\d+ \p\S+ rule: -->
-<decoder name="checkpoint-syslog">
-  <program_name>^Checkpoint</program_name>
-  <prematch>^Checkpoint: \s*\S+ \d\d:\d\d:\d\d </prematch>
-</decoder>
-
 <decoder name="checkpoint-syslog-fw-action">
   <parent>checkpoint-syslog</parent>
   <type>firewall</type>
@@ -99,9 +94,37 @@
   <regex offset="after_prematch">attack: (\S+ \S+);</regex>
   <regex>src:\s*(\S+);\s*dst:\s*(\S+);\s*</regex>
   <regex>proto:\s*(\S+);</regex>
-  <order>extra_data, srcip, dstip, protocol</order>
-  <fts>name, extra_data, srcip, dstip</fts>
-  <ftscomment>First time Checkpoint rule fired.</ftscomment>
+  <order>extra_data</order>
+</decoder>
+<decoder name="checkpoint-syslog-ids">
+  <parent>checkpoint-syslog</parent>
+  <prematch>^Checkpoint: \s*\S+ \d\d:\d\d:\d\d </prematch>
+  <type>ids</type>
+  <prematch offset="after_parent">^Checkpoint: \s*\S+ \d\d:\d\d:\d\d (monitor|drop)</prematch>
+  <regex offset="after_prematch">attack: (\S+ \S+);</regex>
+  <regex>src:\s*(\S+);\s*dst:\s*(\S+);\s*</regex>
+  <regex>proto:\s*(\S+);</regex>
+  <order> srcip</order>
+</decoder>
+<decoder name="checkpoint-syslog-ids">
+  <parent>checkpoint-syslog</parent>
+  <prematch>^Checkpoint: \s*\S+ \d\d:\d\d:\d\d </prematch>
+  <type>ids</type>
+  <prematch offset="after_parent">^Checkpoint: \s*\S+ \d\d:\d\d:\d\d (monitor|drop)</prematch>
+  <regex offset="after_prematch">attack: (\S+ \S+);</regex>
+  <regex>src:\s*(\S+);\s*dst:\s*(\S+);\s*</regex>
+  <regex>proto:\s*(\S+);</regex>
+  <order> dstip</order>
+</decoder>
+<decoder name="checkpoint-syslog-ids">
+  <parent>checkpoint-syslog</parent>
+  <prematch>^Checkpoint: \s*\S+ \d\d:\d\d:\d\d </prematch>
+  <type>ids</type>
+  <prematch offset="after_parent">^Checkpoint: \s*\S+ \d\d:\d\d:\d\d (monitor|drop)</prematch>
+  <regex offset="after_prematch">attack: (\S+ \S+);</regex>
+  <regex>src:\s*(\S+);\s*dst:\s*(\S+);\s*</regex>
+  <regex>proto:\s*(\S+);</regex>
+  <order> protocol</order>
 </decoder>
 
 <decoder name="checkpoint-syslog-ids-src-dst-poroto">
@@ -110,7 +133,21 @@
   <type>ids</type>
   <prematch offset="after_parent">^Checkpoint: \s*\S+ \d\d:\d\d:\d\d (monitor|drop)</prematch>
   <regex>(src:\s*(\S+);\s*dst:\s*(\S+);\s*proto:\s*(\S+);)</regex>
-  <order>srcip, dstip, protocol</order>
-  <fts>name, extra_data, srcip, dstip</fts>
-  <ftscomment>First time Checkpoint rule fired.</ftscomment>
+  <order>srcip</order>
+</decoder>
+<decoder name="checkpoint-syslog-ids-src-dst-poroto">
+  <parent>checkpoint-syslog</parent>
+  <prematch>^Checkpoint: \s*\S+ \d\d:\d\d:\d\d </prematch>
+  <type>ids</type>
+  <prematch offset="after_parent">^Checkpoint: \s*\S+ \d\d:\d\d:\d\d (monitor|drop)</prematch>
+  <regex>src:\s*(\S+;\s*dst:\s*(\S+);\s*proto:\s*(\S+);)</regex>
+  <order> dstip</order>
+</decoder>
+<decoder name="checkpoint-syslog-ids-src-dst-poroto">
+  <parent>checkpoint-syslog</parent>
+  <prematch>^Checkpoint: \s*\S+ \d\d:\d\d:\d\d </prematch>
+  <type>ids</type>
+  <prematch offset="after_parent">^Checkpoint: \s*\S+ \d\d:\d\d:\d\d (monitor|drop)</prematch>
+  <regex>src:\s*\S+;\s*dst:\s*(\S+;\s*proto:\s*(\S+);)</regex>
+  <order> protocol</order>
 </decoder>
