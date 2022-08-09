@@ -3,15 +3,6 @@
 2021/10/05 10:30:21 INFO: Generated private key file in WAZUH_PATH/api/configuration/ssl/server.key
 -->
 
-<decoder name="wazuh-api">
-   
-   <prematch type="pcre2">\s\d+:\d+:\d+\s\w+:\s\S+\s\d+.\d+.\d+.\d+</prematch>
-</decoder>
-
-<decoder name="wazuh-api-info">
-  <prematch type="pcre2">^\d+\/\d+\/\d+\s\d+:\d+:\d+\sINFO:\s\w+\s\w+|^\d+\/\d+\/\d+\s\d+:\d+:\d+\sWARNING:\s\w+\s\w+|^\d+\/\d+\/\d+\s\d+:\d+:\d+\sERROR:\s\w+\s\w+|^\d+\/\d+\/\d+\s\d+:\d+:\d+\sCRITICAL:\s\w+\s\w+</prematch>
-</decoder>
-
 <decoder name="wazuh-api-son">
   <parent>wazuh-api</parent>
   <prematch type="pcre2">\s\d+:\d+:\d+\s\w+:\s\S+\s\d+.\d+.\d+.\d+</prematch>
