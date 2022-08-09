@@ -55,14 +55,6 @@ Mar 10 10:05:59 hostname md    omp[9140]: Authentication failure for 'admin' fro
 [Sat Feb 10 05:18:06 2018][3963] Received the Terminated signal
 -->
 
-<decoder name="gsad">
-  <program_name>^gsad</program_name>
-</decoder>
-
-<decoder name="gsad">
-  <prematch>gsad\s*main:\s*\w+:\w+|gsad\s*omp:\s*\w+:\w+|gsad\s+xslt:\s+\w+:\w+|gsad\s+base:\s+\w+:\w+|gsad\s+vali:\s+\w+:\w+</prematch>
-</decoder>
-
 <decoder name="gsad-auth-failed">
   <parent>gsad</parent>
   <prematch>gsad\s*main:\s*\w+:\w+|gsad\s*omp:\s*\w+:\w+|gsad\s+xslt:\s+\w+:\w+|gsad\s+base:\s+\w+:\w+|gsad\s+vali:\s+\w+:\w+</prematch>
@@ -96,37 +88,21 @@ Mar 10 10:05:59 hostname md    omp[9140]: Authentication failure for 'admin' fro
   <order>status</order>
 </decoder>
 
-<decoder name="openvasmd">
-  <program_name>^md$</program_name>
-</decoder>
-
-<decoder name="openvasmd">
-  <prematch>md\s*main:\s*\w+:\w+|md\s*omp:\s*\w+:\w+|md\s*otp:\s*\w+:\w+|md\s+comm:\s+\w+:\w+|md\s+crypt:\s+\w+:\w+|md\s+manage:\s+\w+:\w+</prematch>
-</decoder>
-
-<decoder name="openvasmd">
-  <prematch>event\s*\w+:\s*\w+:\d\d\d\d-\d\d-\d\d \d\dh\d\d.\d\d UTC:\d+: </prematch>
-</decoder>
-
 <decoder name="openvasmd-auth-failed">
   <parent>openvasmd</parent>
   <prematch>md\s*main:\s*\w+:\w+|md\s*omp:\s*\w+:\w+|md\s*otp:\s*\w+:\w+|md\s+comm:\s+\w+:\w+|md\s+crypt:\s+\w+:\w+|md\s+manage:\s+\w+:\w+|event\s*\w+:\s*\w+:\d\d\d\d-\d\d-\d\d \d\dh\d\d.\d\d UTC:\d+:</prematch>
   <regex offset="after_prematch">Authentication failure for '(\S+)' from \S+</regex>
-  <order>user, srcip</order>
+  <order>user</order>
 </decoder>
 <decoder name="openvasmd-auth-failed">
   <parent>openvasmd</parent>
   <prematch>md\s*main:\s*\w+:\w+|md\s*omp:\s*\w+:\w+|md\s*otp:\s*\w+:\w+|md\s+comm:\s+\w+:\w+|md\s+crypt:\s+\w+:\w+|md\s+manage:\s+\w+:\w+|event\s*\w+:\s*\w+:\d\d\d\d-\d\d-\d\d \d\dh\d\d.\d\d UTC:\d+:</prematch>
   <regex offset="after_prematch">Authentication failure for '\S+' from (\S+)</regex>
-  <order>user, srcip</order>
+  <order>srcip</order>
 </decoder>
 <decoder name="openvasmd-loglevel">
   <parent>openvasmd</parent>
   <prematch>md\s*\w+:|event\s*\w+:</prematch>
   <regex offset="after_prematch">\s*\S+:(\S+):</regex>
   <order>status</order>
-</decoder>
-
-<decoder name="openvassd">
-  <program_name>^openvassd</program_name>
 </decoder>
