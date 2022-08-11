@@ -32,55 +32,79 @@
   -
   - Examples:
   -
-  - Checkpoint: 21Aug2007 12:00:00 accept 10.10.10.2 >eth0 rule: 100; rule_uid:
-{00000000-0000-0000-0000-000000000000}; service_id: nbdatagram; src:
-10.10.10.3; dst: 10.10.10.255; proto: udp; product: VPN-1 & FireWall-1;
-service: 138; s_port: 138;
+  - Checkpoint: 21Aug2007 12:00:00 accept 10.10.10.2 >eth0 rule: 100; rule_uid:{00000000-0000-0000-0000-000000000000}; service_id: nbdatagram; src:10.10.10.3; dst: 10.10.10.255; proto: udp; product: VPN-1 & FireWall-1;service: 138; s_port: 138;
   -
-  - Checkpoint: 13:00:00 accept 10.10.10.2 >eth0 rule: 101; rule_uid:
-{00000000-0000-0000-0000-000000000000}; service_id: http; src: 10.10.10.3; dst:
-10.1.2.3; proto: tcp; product: VPN-1 & FireWall-1; service: 80; s_port: 1111;
+  - Checkpoint: 13:00:00 accept 10.10.10.2 >eth0 rule: 101; rule_uid:{00000000-0000-0000-0000-000000000000}; service_id: http; src: 10.10.10.3; dst:10.1.2.3; proto: tcp; product: VPN-1 & FireWall-1; service: 80; s_port: 1111;
   -
-  - Checkpoint: 21Aug2007 14:49:26 drop   10.10.10.1 >eth4 rule: 102; rule_uid:
-{00000000-0000-0000-0000-000000000000}; ICMP: Echo Request; src: 10.10.10.2;
-dst: 10.10.10.3; proto: icmp; ICMP Type: 8; ICMP Code: 0; product: VPN-1 &
-FireWall-1;
+  - Checkpoint: 21Aug2007 14:49:26 drop   10.10.10.1 >eth4 rule: 102; rule_uid:{00000000-0000-0000-0000-000000000000}; ICMP: Echo Request; src: 10.10.10.2;dst: 10.10.10.3; proto: icmp; ICMP Type: 8; ICMP Code: 0; product: VPN-1 & FireWall-1;
   -
-  - Checkpoint:  3Apr2008 15:02:15 monitor 10.10.10.3 >eth2 Attack Info: Line
-in HTTP request too long; attack: Malformed HTTP; src: 10.10.10.4; dst:
-10.10.10.5; proto: tcp; product: SmartDefense; service: 111; s_port: 222;
+  - Checkpoint:  3Apr2008 15:02:15 monitor 10.10.10.3 >eth2 Attack Info: Linein HTTP request too long; attack: Malformed HTTP; src: 10.10.10.4; dst:10.10.10.5; proto: tcp; product: SmartDefense; service: 111; s_port: 222;
   -->
 
 <!-- \s+\S+ \d\d:\d\d:\d\d (\w+) \d+.\d+.\d+.\d+ \p\S+ rule: -->
 <decoder name="checkpoint-syslog">
   <program_name>^Checkpoint</program_name>
-  <prematch>^\s*\S+ \d\d:\d\d:\d\d </prematch>
+  <prematch>^Checkpoint: \s*\S+ \d\d:\d\d:\d\d </prematch>
 </decoder>
 
-<decoder name="checkpoint-syslog-fw">
+<decoder name="checkpoint-syslog-fw-action">
   <parent>checkpoint-syslog</parent>
   <type>firewall</type>
-  <prematch offset="after_parent">^drop|^accept|^reject</prematch>
-  <regex offset="after_parent">^(\w+)\s+\S+ \p\S+ rule:\.+</regex>
-  <regex>src: (\S+); dst: (\S+); proto: (\S+);</regex>
-  <order>action,srcip,dstip,protocol</order>
+  <prematch offset="after_parent">^Checkpoint: \s*\S+ \d\d:\d\d:\d\d (drop|accept|reject)</prematch>
+  <regex>^Checkpoint: \s*\S+ \d\d:\d\d:\d\d (\S+)</regex>
+  <order>action</order>
+</decoder>
+<decoder name="checkpoint-syslog-fw-srcip">
+  <parent>checkpoint-syslog</parent>
+  <type>firewall</type>
+  <prematch offset="after_parent">^Checkpoint: \s*\S+ \d\d:\d\d:\d\d (drop|accept|reject)</prematch>
+  <regex>src: (\S+);</regex>
+  <order>srcip</order>
+</decoder>
+<decoder name="checkpoint-syslog-fw-dstip">
+  <parent>checkpoint-syslog</parent>
+  <type>firewall</type>
+  <prematch offset="after_parent">^Checkpoint: \s*\S+ \d\d:\d\d:\d\d (drop|accept|reject)</prematch>
+  <regex>dst: (\S+);</regex>
+  <order>dstip</order>
+</decoder>
+<decoder name="checkpoint-syslog-fw-protocol">
+  <parent>checkpoint-syslog</parent>
+  <type>firewall</type>
+  <prematch offset="after_parent">^Checkpoint: \s*\S+ \d\d:\d\d:\d\d (drop|accept|reject)</prematch>
+  <regex>proto: (\S+);</regex>
+  <order>protocol</order>
 </decoder>
 
-<decoder name="checkpoint-syslog-fw">
+<decoder name="checkpoint-syslog-fw-dstport">
   <parent>checkpoint-syslog</parent>
+  <prematch>^Checkpoint: \s*\S+ \d\d:\d\d:\d\d </prematch>
   <type>firewall</type>
-  <regex offset="after_regex">service: (\d+); s_port: (\d+);</regex>
-  <order>dstport,srcport</order>
+  <regex offset="after_regex">service: (\d+);</regex>
+  <order>dstport</order>
+</decoder>
+<decoder name="checkpoint-syslog-fw-srcport">
+  <parent>checkpoint-syslog</parent>
+  <prematch>^Checkpoint: \s*\S+ \d\d:\d\d:\d\d </prematch>
+  <type>firewall</type>
+  <regex offset="after_regex">s_port: (\d+);</regex>
+  <order>srcport</order>
 </decoder>
 
 <decoder name="checkpoint-syslog-ids">
   <parent>checkpoint-syslog</parent>
+  <prematch>Checkpoint: \s*\S+ \d\d:\d\d:\d\d </prematch>
   <type>ids</type>
-  <prematch offset="after_parent">^monitor|^drop</prematch>
-  <regex offset="after_prematch">attack:\s*(\.+);\s*</regex>
-  <regex>src:\s*(\S+);\s*dst:\s*(\S+);\s*</regex>
-  <regex>proto:\s*(\S+);</regex>
+  <prematch offset="after_parent">^Checkpoint: \s*\S+ \d\d:\d\d:\d\d (monitor|drop)</prematch>
+  <regex offset="after_prematch">attack: (\S+ \S+); src:\s*(\S+);\s*dst:\s*(\S+);\s*proto:\s*(\S+);</regex>
   <order>extra_data, srcip, dstip, protocol</order>
-  <fts>name, extra_data, srcip, dstip</fts>
-  <ftscomment>First time Checkpoint rule fired.</ftscomment>
+</decoder>
+
+<decoder name="checkpoint-syslog-ids-src-dst-poroto">
+  <parent>checkpoint-syslog</parent>
+  <prematch>Checkpoint: \s*\S+ \d\d:\d\d:\d\d </prematch>
+  <type>ids</type>
+  <prematch offset="after_parent">^Checkpoint: \s*\S+ \d\d:\d\d:\d\d (monitor|drop)</prematch>
+  <regex>(src:\s*(\S+);\s*dst:\s*(\S+);\s*proto:\s*(\S+);)</regex>
+  <order>srcip, dstip, protocol</order>
 </decoder>
